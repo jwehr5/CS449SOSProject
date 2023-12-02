@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="793.0" prefWidth="996.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.Controller">
+   <children>
+      <GridPane fx:id="gameBoard" alignment="CENTER" gridLinesVisible="true" layoutX="189.0" layoutY="101.0" prefHeight="600.0" prefWidth="600.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="50.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="50.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="50.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="50.0" minHeight="0.0" prefHeight="50.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="50.0" minHeight="0.0" prefHeight="50.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="48.0" prefWidth="50.0" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="52.0" prefWidth="50.0" GridPane.columnIndex="1" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="52.0" prefWidth="50.0" GridPane.columnIndex="2" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="52.0" prefWidth="50.0" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="52.0" prefWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="48.0" prefWidth="50.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="48.0" prefWidth="50.0" GridPane.rowIndex="2" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="48.0" prefWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Button mnemonicParsing="false" onAction="#placePieces" prefHeight="48.0" prefWidth="50.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+         </children>
+      </GridPane>
+      <Text layoutX="424.0" layoutY="66.0" strokeType="OUTSIDE" strokeWidth="0.0" text="SOS" textAlignment="CENTER" wrappingWidth="147.796875">
+         <font>
+            <Font size="48.0" />
+         </font>
+      </Text>
+      <Text layoutX="605.0" layoutY="87.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Board Size:" textAlignment="CENTER" wrappingWidth="120.13671875">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <ChoiceBox fx:id="boardSizes" layoutX="734.0" layoutY="68.0" prefHeight="25.0" prefWidth="55.0" />
+      <RadioButton fx:id="simpleGame" layoutX="35.0" layoutY="70.0" mnemonicParsing="false" onAction="#setGameMode" text="Simple Game">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <toggleGroup>
+            <ToggleGroup fx:id="gameMode" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="generalGame" layoutX="179.0" layoutY="71.0" mnemonicParsing="false" onAction="#setGameMode" text="General Game" toggleGroup="$gameMode">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </RadioButton>
+      <Button fx:id="startGame" disable="true" layoutX="874.0" layoutY="53.0" mnemonicParsing="false" onAction="#startGameInMainWindow" text="Start Game">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+      <Text fx:id="bluePlayerLabel" layoutX="34.0" layoutY="180.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Blue Player">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Text>
+      <RadioButton fx:id="bluePlayer_S" disable="true" layoutX="35.0" layoutY="262.0" mnemonicParsing="false" text="S">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <toggleGroup>
+            <ToggleGroup fx:id="bluePlayerOptions" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="bluePlayer_O" disable="true" layoutX="84.0" layoutY="262.0" mnemonicParsing="false" text="O" toggleGroup="$bluePlayerOptions">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </RadioButton>
+      <RadioButton fx:id="redPlayer_O" disable="true" layoutX="929.0" layoutY="262.0" mnemonicParsing="false" text="O">
+         <font>
+            <Font size="14.0" />
+         </font>
+         <toggleGroup>
+            <ToggleGroup fx:id="redPlayerOptions" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="redPlayer_S" disable="true" layoutX="874.0" layoutY="262.0" mnemonicParsing="false" text="S" toggleGroup="$redPlayerOptions">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </RadioButton>
+      <Text fx:id="redPlayerLabel" layoutX="876.0" layoutY="179.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Red Player">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Text>
+      <Text fx:id="currentPlayer" layoutX="322.0" layoutY="738.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Current Player: " wrappingWidth="335.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Text>
+      <Button fx:id="restartButton" disable="true" layoutX="874.0" layoutY="93.0" mnemonicParsing="false" onAction="#restartGame" prefHeight="30.0" prefWidth="87.0" text="Restart" />
+      <Text fx:id="bluePlayerScore" layoutX="35.0" layoutY="315.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="75.81249999999994">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Text>
+      <Text fx:id="redPlayerScore" layoutX="871.0" layoutY="316.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="75.81249999999994">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Text>
+      <RadioButton fx:id="bluePlayerHuman" layoutX="35.0" layoutY="195.0" mnemonicParsing="false" onAction="#selectPlayerType" prefHeight="17.0" prefWidth="76.0" text="Human">
+         <toggleGroup>
+            <ToggleGroup fx:id="bluePlayerType" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="bluePlayerComputer" layoutX="34.0" layoutY="225.0" mnemonicParsing="false" onAction="#selectPlayerType" prefHeight="17.0" prefWidth="87.0" text="Computer" toggleGroup="$bluePlayerType" />
+      <RadioButton fx:id="redPlayerHuman" layoutX="875.0" layoutY="195.0" mnemonicParsing="false" onAction="#selectPlayerType" prefHeight="17.0" prefWidth="76.0" text="Human">
+         <toggleGroup>
+            <ToggleGroup fx:id="redPlayerType" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="redPlayerComputer" layoutX="875.0" layoutY="225.0" mnemonicParsing="false" onAction="#selectPlayerType" text="Computer" toggleGroup="$redPlayerType" />
+      <CheckBox fx:id="recordGame" layoutX="31.0" layoutY="739.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="148.0" text="Record Game">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </CheckBox>
+   </children>
+</AnchorPane>
