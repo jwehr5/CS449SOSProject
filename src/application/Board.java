@@ -12,6 +12,8 @@ public abstract class Board {
 	
 	//This is the size of the game board;
 	private int sizeOfBoard;
+	private final int MIN_BOARD_SIZE = 3;
+	private final int MAX_BOARD_SIZE = 12; 
 	
 	//This will keep track of the who the current player is. Blue will get to go first.
 	protected String currentPlayer = "Blue";
@@ -25,7 +27,7 @@ public abstract class Board {
 	protected String winner = "";
 	
 	//There may be a case where 2 solutions are found in one turn. We'll store the solutions in an ArrayList.
-	protected ArrayList<Integer> solutions = new ArrayList<Integer>();
+	protected ArrayList<Directions> solutions = new ArrayList<Directions>();
 	
 	//Default constructor used for testing purposes.
 	public Board() {
@@ -38,12 +40,12 @@ public abstract class Board {
 				sosBoard[i][j] = ' ';
 			}
 		}
-	}
+	} 
 	
 	//Constructor that takes board size as a parameter.
 	public Board(int size) {
 		//Check to see if the size is valid.
-		if(size <= 2 || size > 12) {
+		if(size <= MIN_BOARD_SIZE - 1 || size > MAX_BOARD_SIZE) {
 			size = 3;
 		}
 		
@@ -73,56 +75,56 @@ public abstract class Board {
 				
 			if(getCellValue(row - 1, col) != '-' && getCellValue(row - 1, col) == 'O') { 
 				if(getCellValue(row - 2, col) != '-' && getCellValue(row - 2, col) == 'S') {
-					solutions.add(0);
+					solutions.add(Directions.TOP);
 							
 				}
 			}
 			
 			if(getCellValue(row - 1, col + 1) != '-' && getCellValue(row - 1, col + 1) == 'O') {
 				if(getCellValue(row - 2, col + 2) != '-' && getCellValue(row - 2, col + 2) == 'S') {
-					solutions.add(1);
+					solutions.add(Directions.TOP_RIGHT);
 							
 				}
 			}
 			
 			if(getCellValue(row, col + 1) != '-' && getCellValue(row, col + 1) == 'O') {
 				if(getCellValue(row, col + 2) != '-' && getCellValue(row, col + 2) == 'S') {
-					solutions.add(2);
+					solutions.add(Directions.RIGHT);
 						
 				}
 			}
 			
 			if(getCellValue(row + 1, col + 1) != '-' && getCellValue(row + 1, col + 1) == 'O') {
 				if(getCellValue(row + 2, col + 2) != '-' && getCellValue(row + 2, col + 2) == 'S') {
-					solutions.add(3);
+					solutions.add(Directions.BOTTOM_RIGHT);
 							
 				}
 			}
 			
 			if(getCellValue(row + 1, col) != '-' && getCellValue(row + 1, col) == 'O') {
 				if(getCellValue(row + 2, col) != '-' && getCellValue(row + 2, col) == 'S') {
-					solutions.add(4);
+					solutions.add(Directions.BOTTOM);
 							
 				}
 			}
 			
 			if(getCellValue(row + 1, col - 1) != '-' && getCellValue(row + 1, col - 1) == 'O') {
 				if(getCellValue(row + 2, col - 2) != '-' && getCellValue(row + 2, col - 2) == 'S') {
-					solutions.add(5);
+					solutions.add(Directions.BOTTOM_LEFT);
 							
 				}
 			}
 			
 			if(getCellValue(row, col - 1) != '-' && getCellValue(row, col - 1) == 'O') {
 				if(getCellValue(row, col - 2) != '-' && getCellValue(row, col - 2) == 'S') {
-					solutions.add(6);
+					solutions.add(Directions.LEFT);
 							
 				}
 			}
 			
 			if(getCellValue(row - 1, col - 1) != '-' && getCellValue(row - 1, col - 1) == 'O') {
 				if(getCellValue(row - 2, col - 2) != '-' && getCellValue(row - 2, col - 2) == 'S') {
-					solutions.add(7);
+					solutions.add(Directions.TOP_LEFT);
 							
 				}
 			}
@@ -135,27 +137,27 @@ public abstract class Board {
 			
 			if(getCellValue(row - 1, col) != '-' && getCellValue(row - 1, col) == 'S') {
 				if(getCellValue(row + 1, col) != '-' && getCellValue(row + 1, col) == 'S'){
-					solutions.add(0);
+					solutions.add(Directions.TOP);
 				}
 			} 
 			
 			if(getCellValue(row - 1, col + 1) != '-' && getCellValue(row - 1, col + 1) == 'S') {
 				if(getCellValue(row + 1, col - 1) != '-' && getCellValue(row + 1, col - 1) == 'S') {
-					solutions.add(1);
+					solutions.add(Directions.TOP_RIGHT);
 				}
 				
 			}
 			
 			if(getCellValue(row, col + 1) != '-' && getCellValue(row, col + 1) == 'S') {
 				if(getCellValue(row, col - 1) != '-' && getCellValue(row, col - 1) == 'S') {
-					solutions.add(2);
+					solutions.add(Directions.RIGHT);
 				}
 				
 			}
 			
 			if(getCellValue(row + 1, col + 1) != '-' && getCellValue(row + 1, col + 1) == 'S') {
 				if(getCellValue(row - 1, col - 1) != '-' && getCellValue(row - 1, col - 1) == 'S') {
-					solutions.add(3);
+					solutions.add(Directions.BOTTOM_RIGHT);
 							
 				}
 			}
@@ -177,12 +179,11 @@ public abstract class Board {
 				sosBoard[row][col] = piece;
 				sucessfullyMadeMove = true;
 				 
-				
 			}
 					
 		}
 		
-		return sucessfullyMadeMove;
+		return sucessfullyMadeMove; 
 		
 	}
 	
@@ -220,11 +221,7 @@ public abstract class Board {
 		
 	}
 	
-	//Returns the currentPlayer
-	public String getCurrentPlayer() {
-		return currentPlayer;
-	}
-	
+
 	//Returns the value at a given cell in the game board.
 	public char getCellValue(int row, int col) {
 		if(row >= 0 && row < sizeOfBoard && col >= 0 && col < sizeOfBoard ) { 
@@ -232,7 +229,6 @@ public abstract class Board {
 		}else {
 			return '-';
 		}
-		
 		
 	}
 	
@@ -249,6 +245,11 @@ public abstract class Board {
 			System.out.println();
 		}
 		System.out.println();
+	}
+	
+	//Returns the currentPlayer
+	public String getCurrentPlayer() {
+		return currentPlayer;
 	}
 	
 	//Returns the size of the board.
@@ -270,5 +271,4 @@ public abstract class Board {
 	}
 
 
-	
 }

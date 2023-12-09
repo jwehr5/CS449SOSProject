@@ -11,11 +11,10 @@ public class GeneralGameBoard extends Board{
 	}
 	
 	public GeneralGameBoard() {
-		super(3);
+		super(3); 
 	}
 	
 	
-
 	@Override
 	public void makeMove(int row, int col, char startingPiece) { 
 		

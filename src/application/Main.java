@@ -29,7 +29,7 @@ public class Main extends Application {
 			Controller controller = loader.getController();
 			primaryStage.setOnHidden(e ->{
 				try {
-					controller.recording.close();
+					controller.closeRecorder();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

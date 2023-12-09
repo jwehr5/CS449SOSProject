@@ -39,7 +39,7 @@ public class Controller implements Initializable{
 	
 	//This is the game board where the game will take place.
 	@FXML
-	private GridPane gameBoard;
+	private GridPane gameBoardGUI;
 	
 	//Radio buttons that let the user select a simple or general game
 	@FXML
@@ -76,9 +76,7 @@ public class Controller implements Initializable{
 	
 	//This is the size of the board that the user chooses.
 	private int size;
-	
-	//Boolean that keeps track if the game has started or not.
-	private boolean gameHasStarted = false;
+	private final int DEFAULT_BOARD_SIZE = 3;
 	
 	//Booleans that determine if a simple or general game is being played.
 	private boolean simpleGameIsSelected = false;
@@ -102,7 +100,7 @@ public class Controller implements Initializable{
 	
 	
 	//The Board class will be used to represent the game logic.
-	private Board b;
+	private Board gameBoardLogic;
 	
 	//These will be represent the players of the game
 	private Player bluePlayer;
@@ -115,9 +113,7 @@ public class Controller implements Initializable{
 	@FXML
 	private CheckBox recordGame;
 	
-	//If the player chooses to record the game, then this will allow us to create and to write to a file.
-	FileWriter recording;
-	
+	private Recorder recording;
 	
 	// This method runs when the GUI application is first loaded up and initializes certain GUI elements. 
 	@Override
@@ -134,11 +130,27 @@ public class Controller implements Initializable{
 		size = 3;
 		
 		//Initialize the default board and set the row and column index for each cell.
-		gameBoard.getChildren().clear();
-		for(int i = 0; i < 3; i++) {
-			for(int j = 0; j < 3; j++) {
+		gameBoardGUI.getChildren().clear();
+		initializeBoard(DEFAULT_BOARD_SIZE);
+		
+		
+		//If the player chooses to record the game, then this will allow us to create and to write to a file.
+		try {
+			 recording = new Recorder();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	//This method will initialize the GUI gameboard to the desired size.
+	private void initializeBoard(int boardSize) {
+		
+		//Initialize the game board. Each cell will contain a button that the player will click on when placing their piece.
+		for(int i = 0; i < boardSize; i++) {
+			for(int j = 0; j < boardSize; j++) {
 				Button b = new Button();
-				gameBoard.add(b,i,j);
+				gameBoardGUI.add(b,i,j);
 				b.setPrefWidth(50);
 				b.setPrefHeight(50);
 				b.setStyle("-fx-border-color: black;");
@@ -146,21 +158,11 @@ public class Controller implements Initializable{
 					try {
 						placePieces(arg01);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				});  
 			}
 		}
-		
-		//Initialize the file on which the game will be recorded on when the player chooses to record the game.
-		try {
-			recording = new FileWriter("moves.txt");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		
 	}
 	
@@ -169,28 +171,9 @@ public class Controller implements Initializable{
 		size = boardSizes.getValue();
 		
 		//Clear the existing game board so that a new one can be initialized to the new size.
-		gameBoard.getChildren().clear();
+		gameBoardGUI.getChildren().clear();
 		
-		//Initialize the new game board. Each cell will contain a button that the player will click on when placing their piece.
-		for(int i = 0; i < size; i++) {
-			for(int j = 0; j < size; j++) {
-				Button b = new Button();
-				gameBoard.add(b,i,j);
-				b.setPrefWidth(50);
-				b.setPrefHeight(50);
-				b.setStyle("-fx-border-color: black;");
-				b.setOnAction(arg0 -> {
-					try {
-						placePieces(arg0);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				});
-				
-			}
-			
-		}
+		initializeBoard(size);
 		
 	}
 	
@@ -223,34 +206,29 @@ public class Controller implements Initializable{
 	
 	//Method that starts a new game.
 	public void startGameInMainWindow(ActionEvent e) throws IOException {
-		System.out.println("First print statement in startGame");
 		
 		restartButton.setDisable(false);
 		
 		//Initialize the board class to the size that the user selected.
 		if(simpleGameIsSelected) {
-			System.out.println("When starting a new game, board size is: " + size); 
-			b = new SimpleGameBoard(size);
+			gameBoardLogic = new SimpleGameBoard(size);
 			
 			//If the game is being recorded then write the type of game that is being played.
 			if(recordGame.isSelected()) {
-				recording.write("Starting a Simple Game with a board size of " + b.getBoardSize());
-				recording.write(System.getProperty("line.separator"));
+				recording.writeTitleOfGame(simpleGameIsSelected, size);
 				
 			}
 			
 			
 			
 		}else if(generalGameIsSelected) {
-			b = new GeneralGameBoard(size);
+			gameBoardLogic = new GeneralGameBoard(size);
 			bluePlayerScore.setText("Score: 0");
 			redPlayerScore.setText("Score: 0");
 			
 			//If the game is being recorded then write the type of game that is being played.
 			if(recordGame.isSelected()) { 
-				recording.write("Starting a General Game with a board size of " + b.getBoardSize());
-				recording.write(System.getProperty("line.separator"));
-				
+				recording.writeTitleOfGame(simpleGameIsSelected, size);
 				
 			} 
 			
@@ -288,17 +266,17 @@ public class Controller implements Initializable{
 		
 		//If the blue player is a computer then go ahead and kick off the turn
 		if(bluePlayer.getPlayerType() == "Computer") {
-			Button playedButton = ((ComputerPlayer) bluePlayer).makeAStrategicMove(b, gameBoard);
-			validateSolutionGUI(b, playedButton, ((ComputerPlayer) bluePlayer).getRecentlyPlacedPiece());
+			Button playedButton = ((ComputerPlayer) bluePlayer).makeAStrategicMove(gameBoardLogic, gameBoardGUI);
+			validateSolutionGUI(playedButton, ((ComputerPlayer) bluePlayer).getRecentlyPlacedPiece());
 			
 			//If the game is being recorded, then write out the move that was made.
 			if(recordGame.isSelected()) {
-				recording.write("Blue places an '" + ((ComputerPlayer) bluePlayer).getRecentlyPlacedPiece() + "' at cell ("
-						+ ((ComputerPlayer) bluePlayer).getRecentRowIndexMove() + "," + ((ComputerPlayer) bluePlayer).getRecentColIndexMove() + ")");
-				recording.write(System.getProperty("line.separator"));
+				recording.writeMove(bluePlayer, ((ComputerPlayer) bluePlayer).getRecentlyPlacedPiece(), ((ComputerPlayer) bluePlayer).getRecentRowIndexMove(), 
+								    ((ComputerPlayer) bluePlayer).getRecentColIndexMove());
+				
 			}
 			
-			checkForGameOverGUI(b);
+			checkForGameOverGUI();
 			
 			 
 			
@@ -356,30 +334,11 @@ public class Controller implements Initializable{
 		redPlayerScore.setText(" ");
 		
 		//Clear the board and then re-initialize it to the default 3x3 board.
-		gameBoard.getChildren().clear();
-		b.clearBoard();
+		gameBoardGUI.getChildren().clear();
+		gameBoardLogic.clearBoard();
 		size = 3;
 		boardSizes.setValue(3);
-		for(int i = 0; i < size; i++) {
-			for(int j = 0; j < size; j++) {
-				Button b = new Button();
-				gameBoard.add(b,i,j);
-				b.setPrefWidth(50);
-				b.setPrefHeight(50);
-				b.setStyle("-fx-border-color: black;");
-				b.setOnAction(arg0 -> {
-					try {
-						placePieces(arg0);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				});
-				
-			}
-			
-		}
-		
+		initializeBoard(DEFAULT_BOARD_SIZE);
 		
 		//Disable the restart button.
 		restartButton.setDisable(true);
@@ -387,7 +346,7 @@ public class Controller implements Initializable{
 			timeline.stop(); 
 		}
 		
-	}
+	} 
 	
 	//Method that is responsible for placing the pieces on the board.
 	public void placePieces(ActionEvent e) throws IOException { 
@@ -398,135 +357,86 @@ public class Controller implements Initializable{
 		decolorSquares();
 		
 		//Check to see if the game has started and that its the Blue player's turn.
-		if(!b.isGameOver() && b.getCurrentPlayer() == "Blue") {
+		if(!gameBoardLogic.isGameOver() && gameBoardLogic.getCurrentPlayer() == "Blue") {
 		
 			//If the Blue Player selected S, then place an S at the cell that they clicked on.
 			if(bluePlayer_S.isSelected()) {
-				//Place the piece on the GUI board
-				bluePlayer.placePieceOnGUIBoard(pressedButton, "S");
-
-				//Make the corresponding move in the Board class placing an S at the right row and column.
-				b.makeMove(GridPane.getRowIndex(pressedButton), GridPane.getColumnIndex(pressedButton), 'S'); 
 				
-				//If the game is being recorded, then write out the move that was made.
-				if(recordGame.isSelected()) {
-					recording.write("Blue places an 'S' at cell (" + GridPane.getRowIndex(pressedButton) + ","
-									+ GridPane.getColumnIndex(pressedButton) + ")");
-					recording.write(System.getProperty("line.separator"));
-				}
-				
-				//Validate the solution by coloring in the appropriate cells
-				validateSolutionGUI(b, pressedButton, 'S');
-				
-				//Check for a game over
-				checkForGameOverGUI(b);
-				
+				processTurnGUI(bluePlayer, 'S', pressedButton);
 				
 			//If the Blue Player selected O, then place an S at the cell that they clicked on.
 			}else if(bluePlayer_O.isSelected()) {
-				//Place the piece on the GUI board
-				bluePlayer.placePieceOnGUIBoard(pressedButton, "O");
 				
-				//Make the corresponding move in the Board class placing an O at the right row and column.
-				b.makeMove(GridPane.getRowIndex(pressedButton), GridPane.getColumnIndex(pressedButton), 'O');
-				
-				//If the game is being recorded, then write out the move that was made.
-				if(recordGame.isSelected()) {
-					recording.write("Blue places an 'O' at cell (" + GridPane.getRowIndex(pressedButton) + ","
-									+ GridPane.getColumnIndex(pressedButton) + ")");
-					recording.write(System.getProperty("line.separator"));
-				}
-				
-				//Validate the solution by coloring in the appropriate cells
-				validateSolutionGUI(b, pressedButton, 'O');
-				
-				//Check for a game over
-				checkForGameOverGUI(b);
-				
+				processTurnGUI(bluePlayer, 'O', pressedButton);
 				
 			} 
 			 
 		//Check to see if the game has started and that its the Red player's turn.
-		}else if(!b.isGameOver() && b.getCurrentPlayer() == "Red") {
+		}else if(!gameBoardLogic.isGameOver() && gameBoardLogic.getCurrentPlayer() == "Red") {
 			
 			//If the Red Player selected S, then place an S at the cell that they clicked on.
 			if(redPlayer_S.isSelected()) {
-				//Place the piece on the GUI board
-				redPlayer.placePieceOnGUIBoard(pressedButton, "S");
-				
-				//Make the corresponding move in the Board class placing an S at the right row and column.
-				b.makeMove(GridPane.getRowIndex(pressedButton), GridPane.getColumnIndex(pressedButton), 'S');
-				
-				//If the game is being recorded, then write out the move that was made.
-				if(recordGame.isSelected()) {
-					recording.write("Red places an 'S' at cell (" + GridPane.getRowIndex(pressedButton) + ","
-									+ GridPane.getColumnIndex(pressedButton) + ")");
-					recording.write(System.getProperty("line.separator"));
-				}
-				
-				//Validate the solution by coloring in the appropriate cells
-				validateSolutionGUI(b, pressedButton, 'S');
-				
-				//Check for a game over
-				checkForGameOverGUI(b);
-				
+			
+				processTurnGUI(redPlayer, 'S', pressedButton);
 				
 			//If the Red Player selected O, then place an O at the cell that they clicked on.
 			}else if(redPlayer_O.isSelected()) {
-				//Place the piece on the GUI board
-				redPlayer.placePieceOnGUIBoard(pressedButton, "O");
 				
-				//Make the corresponding move in the Board class placing an O at the right row and column.
-				b.makeMove(GridPane.getRowIndex(pressedButton), GridPane.getColumnIndex(pressedButton), 'O');
-				
-				//If the game is being recorded, then write out the move that was made.
-				if(recordGame.isSelected()) {
-					recording.write("Red places an 'O' at cell (" + GridPane.getRowIndex(pressedButton) + ","
-									+ GridPane.getColumnIndex(pressedButton) + ")");
-					recording.write(System.getProperty("line.separator"));
-				}
-				
-				//Validate the solution by coloring in the appropriate cells
-				validateSolutionGUI(b, pressedButton, 'O');
-				
-				//Check for a game over
-				checkForGameOverGUI(b);
-				
+				processTurnGUI(redPlayer, 'O', pressedButton);
 			}
 			 
 		}
 	}
 	
+	private void processTurnGUI(Player currentPlayer, char playedPiece, Button pressedButton) throws IOException {
+		//Place the piece on the GUI board
+		currentPlayer.placePieceOnGUIBoard(pressedButton, Character.toString(playedPiece));
+
+		//Make the corresponding move in the Board class placing the played piece at the right row and column.
+		gameBoardLogic.makeMove(GridPane.getRowIndex(pressedButton), GridPane.getColumnIndex(pressedButton), playedPiece); 
+		
+		//If the game is being recorded, then write out the move that was made.
+		if(recordGame.isSelected()) {
+			recording.writeMove(currentPlayer, playedPiece, GridPane.getRowIndex(pressedButton), GridPane.getColumnIndex(pressedButton));
+		}
+		
+		//Validate the solution by coloring in the appropriate cells
+		validateSolutionGUI(pressedButton, playedPiece);
+		
+		//Check for a game over
+		checkForGameOverGUI();  
+		
+	}
+	
 	//This method will check if any solutions were found and activate the coloring of cells
-	public void validateSolutionGUI(Board b, Button pressedButton, char playedPiece) {
+	public void validateSolutionGUI(Button pressedButton, char playedPiece) {
 		//If direction is not equal to -1, then that means a solution was found.
-		if(b.solutions.size() != 0) {
+		if(gameBoardLogic.solutions.size() != 0) {
 			//System.out.println("Valid SOS sequence");
 			
 			//Color the corresponding squares where the SOS sequence happened for each solution.
-			for(int i = 0; i < b.solutions.size(); i++) {
+			for(int i = 0; i < gameBoardLogic.solutions.size(); i++) {
 				
-				colorSquares(GridPane.getRowIndex(pressedButton), GridPane.getColumnIndex(pressedButton), 
-						b.solutions.get(i), playedPiece , pressedButton, b.getCurrentPlayer());
+				colorSquares(pressedButton, gameBoardLogic.solutions.get(i), playedPiece , gameBoardLogic.getCurrentPlayer());
 				
-			}
+			} 
 			
 			//If a general game is being played, update the Blue or Red player's score.
-			if(generalGameIsSelected && b.getCurrentPlayer() == "Blue") {
-				bluePlayerScore.setText("Score: " + ((GeneralGameBoard) b).getBluePoints());
-			}else if(generalGameIsSelected && b.getCurrentPlayer() == "Red") {
-				redPlayerScore.setText("Score: " + ((GeneralGameBoard) b).getRedPoints()); 
+			if(generalGameIsSelected && gameBoardLogic.getCurrentPlayer() == "Blue") {
+				bluePlayerScore.setText("Score: " + ((GeneralGameBoard) gameBoardLogic).getBluePoints());
+			}else if(generalGameIsSelected && gameBoardLogic.getCurrentPlayer() == "Red") {
+				redPlayerScore.setText("Score: " + ((GeneralGameBoard) gameBoardLogic).getRedPoints()); 
 			}
 			
 			
-		}
+		} 
 		
 	}
 	
 	//This method will end the game if the game is over
-	public void checkForGameOverGUI(Board b) throws IOException {
+	public void checkForGameOverGUI() throws IOException {
 		//If the game is over, disable the buttons for both players and display who won
-		if(b.isGameOver() && !b.isDrawGame()) { 
+		if(gameBoardLogic.isGameOver() && !gameBoardLogic.isDrawGame()) { 
 			
 			bluePlayer_S.setDisable(true);
 			bluePlayer_O.setDisable(true);
@@ -535,7 +445,7 @@ public class Controller implements Initializable{
 			
 			//If a general game is being played, then whoever scored the most points wins the game.
 			if(generalGameIsSelected) {
-				if(((GeneralGameBoard) b).getBluePoints() > ((GeneralGameBoard) b).getRedPoints()) {
+				if(((GeneralGameBoard) gameBoardLogic).getBluePoints() > ((GeneralGameBoard) gameBoardLogic).getRedPoints()) {
 					currentPlayer.setText("Blue has won the game" + "\n Click Restart to initiate a new game");
 					currentPlayer.setFill(Color.BLUE);
 				}else {
@@ -543,26 +453,24 @@ public class Controller implements Initializable{
 					currentPlayer.setFill(Color.RED);
 				}
 			}else {
-				currentPlayer.setText(b.getCurrentPlayer() + " has won the game" + "\n Click Restart to initiate a new game");
-				if(b.getCurrentPlayer() == "Blue") {
+				currentPlayer.setText(gameBoardLogic.getCurrentPlayer() + " has won the game" + "\n Click Restart to initiate a new game");
+				if(gameBoardLogic.getCurrentPlayer() == "Blue") {
 					currentPlayer.setFill(Color.BLUE);
 				}else {
-					currentPlayer.setFill(Color.RED);
+					currentPlayer.setFill(Color.RED); 
 				}
 			}
 			
 			//If the game is being recorded, then write out who won the game.
 			if(recordGame.isSelected()) {
-				recording.write("Game is finished with " + b.getWinner() + " being the winner");
-				recording.write(System.getProperty("line.separator"));
-				recording.write(System.getProperty("line.separator")); 
+				recording.writeConclusion(gameBoardLogic.isDrawGame(), gameBoardLogic.getWinner());
 			}
 			
 		
 			
 			
 		//If its a draw game, then display that the game ended in a draw.	
-		}else if(b.isGameOver() && b.isDrawGame()){  
+		}else if(gameBoardLogic.isGameOver() && gameBoardLogic.isDrawGame()){  
 			
 			bluePlayer_S.setDisable(true);
 			bluePlayer_O.setDisable(true);
@@ -573,15 +481,13 @@ public class Controller implements Initializable{
 			
 			//If the game is being recorded, then write out who won the game.
 			if(recordGame.isSelected()) {
-				recording.write("Game is finished with " + b.getWinner() + " being the winner");
-				recording.write(System.getProperty("line.separator"));
-				recording.write(System.getProperty("line.separator"));
+				recording.writeConclusion(gameBoardLogic.isDrawGame(), " ");
 			}
 			
 			
 			
 		//It will now be the Red player's turn so disable the Blue Player's Buttons and enable the Red Player's.
-		}else if(!b.isGameOver() && b.getCurrentPlayer() == "Red") { 
+		}else if(!gameBoardLogic.isGameOver() && gameBoardLogic.getCurrentPlayer() == "Red") { 
 			
 			bluePlayer_S.setDisable(true);
 			bluePlayer_O.setDisable(true);
@@ -595,47 +501,13 @@ public class Controller implements Initializable{
 				redPlayer_S.setDisable(true);
 				redPlayer_O.setDisable(true);
 				
-				 timeline = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() { 
-
-				    @Override
-				    public void handle(ActionEvent event) {
-				    	decolorSquares();
-				    	Button playedButton = ((ComputerPlayer) redPlayer).makeAStrategicMove(b, gameBoard);
-						validateSolutionGUI(b, playedButton, ((ComputerPlayer) redPlayer).getRecentlyPlacedPiece());
-						
-						//If the game is being recorded, then write out the move that was made.
-						if(recordGame.isSelected()) { 
-							try {
-								recording.write("Red places an '" + ((ComputerPlayer) redPlayer).getRecentlyPlacedPiece() + "' at cell ("
-										+ ((ComputerPlayer) redPlayer).getRecentRowIndexMove() + "," + ((ComputerPlayer) redPlayer).getRecentColIndexMove() + ")");
-								recording.write(System.getProperty("line.separator"));
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							
-						}
-						
-						
-						System.out.println("Calling checkForGameOverGUI As a red Computer Player");
-						try {
-							checkForGameOverGUI(b);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} 
-				       
-				    }
-				}));
-				
-				timeline.play();  
-				
+				switchComputerPlayer(redPlayer);  
 				
 				
 			}
 		
 		//It will now be the Blue player's turn so disable the Red Player's Buttons and enable the Blue Player's.
-		}else if(!b.isGameOver() && b.getCurrentPlayer() == "Blue") {
+		}else if(!gameBoardLogic.isGameOver() && gameBoardLogic.getCurrentPlayer() == "Blue") {
 			redPlayer_S.setDisable(true);
 			redPlayer_O.setDisable(true);
 			bluePlayer_S.setDisable(false);
@@ -648,124 +520,131 @@ public class Controller implements Initializable{
 				bluePlayer_S.setDisable(true);
 				bluePlayer_O.setDisable(true);
 				
-				 timeline = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() { 
-
-				    @Override
-				    public void handle(ActionEvent event) {
-				    	decolorSquares();
-				    	Button playedButton = ((ComputerPlayer) bluePlayer).makeAStrategicMove(b, gameBoard);
-						validateSolutionGUI(b, playedButton, ((ComputerPlayer) bluePlayer).getRecentlyPlacedPiece());
-						
-						//If the game is being recorded, then write out the move that was made.
-						if(recordGame.isSelected()) {
-							try {
-								recording.write("Blue places an '" + ((ComputerPlayer) bluePlayer).getRecentlyPlacedPiece() + "' at cell ("
-										+ ((ComputerPlayer) bluePlayer).getRecentRowIndexMove() + "," + ((ComputerPlayer) bluePlayer).getRecentColIndexMove() + ")");
-								recording.write(System.getProperty("line.separator"));
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							
-						}
-						
-						
-						System.out.println("Calling checkForGameOverGUI As a blue Computer Player");
-						try {
-							checkForGameOverGUI(b);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-				       
-				    }
-				}));
-				
-				timeline.play();
+				switchComputerPlayer(bluePlayer);
 				
 			}
 			
 		}
 		
 		
+	}
+	
+	private void switchComputerPlayer(Player computerPlayer) { 
+		timeline = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() { 
+
+		    @Override
+		    public void handle(ActionEvent event) {
+		    	decolorSquares();
+		    	Button playedButton = ((ComputerPlayer) computerPlayer).makeAStrategicMove(gameBoardLogic, gameBoardGUI);
+				validateSolutionGUI(playedButton, ((ComputerPlayer) computerPlayer).getRecentlyPlacedPiece());
+				
+				//If the game is being recorded, then write out the move that was made.
+				if(recordGame.isSelected()) {
+					try {
+						recording.writeMove(computerPlayer, ((ComputerPlayer) computerPlayer).getRecentlyPlacedPiece(), ((ComputerPlayer) computerPlayer).getRecentRowIndexMove(), 
+										   ((ComputerPlayer) computerPlayer).getRecentColIndexMove());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+				} 
+				
+				try {
+					checkForGameOverGUI();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		       
+		    }
+		}));
+		
+		timeline.play();
 		
 	}
 	
 	//Method for coloring squares where a corresponding SOS sequence happened.
-	public void colorSquares(int row, int col, int direction, char playedPiece, Button pressedButton, String currentPlayer) {
+	public void colorSquares(Button pressedButton, Directions direction, char playedPiece, String currentPlayer) {
 		pressedButton.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 							   + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 		
-		for(Node button : gameBoard.getChildren()) {
-			if(direction == 0 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col) ||
+		int row = GridPane.getRowIndex(pressedButton);
+		int col = GridPane.getColumnIndex(pressedButton);
+		
+		for(Node button : gameBoardGUI.getChildren()) {
+			if(direction == Directions.TOP && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col) ||
 			   GridPane.getRowIndex(button) == row - 2 && GridPane.getColumnIndex(button) == col)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 						        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 1 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col + 1) ||
+			}else if(direction == Directions.TOP_RIGHT && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col + 1) ||
 			   GridPane.getRowIndex(button) == row - 2 && GridPane.getColumnIndex(button) == col + 2)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 2 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col + 1) ||
+			}else if(direction == Directions.RIGHT && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col + 1) ||
 			   GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col + 2)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 3 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col + 1) ||
+			}else if(direction == Directions.BOTTOM_RIGHT && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col + 1) ||
 			   GridPane.getRowIndex(button) == row + 2 && GridPane.getColumnIndex(button) == col + 2)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 4 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col) ||
+			}else if(direction == Directions.BOTTOM && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col) ||
 				GridPane.getRowIndex(button) == row + 2 && GridPane.getColumnIndex(button) == col)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 5 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col - 1) ||
+			}else if(direction == Directions.BOTTOM_LEFT && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col - 1) ||
 				GridPane.getRowIndex(button) == row + 2 && GridPane.getColumnIndex(button) == col - 2)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 6 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col - 1) ||
+			}else if(direction == Directions.LEFT && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col - 1) ||
 				GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col - 2)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 		
-			}else if(direction == 7 && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col - 1) ||
+			}else if(direction == Directions.TOP_LEFT && playedPiece == 'S' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col - 1) ||
 				GridPane.getRowIndex(button) == row - 2 && GridPane.getColumnIndex(button) == col - 2)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 0 && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col) ||
+			}else if(direction == Directions.TOP && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col) ||
 				GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 1 && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col + 1) ||
+			}else if(direction == Directions.TOP_RIGHT && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col + 1) ||
 				GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col - 1)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 2 && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col + 1) ||
+			}else if(direction == Directions.RIGHT && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col + 1) ||
 				GridPane.getRowIndex(button) == row && GridPane.getColumnIndex(button) == col - 1)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
 				
-			}else if(direction == 3 && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col + 1) ||
+			}else if(direction == Directions.BOTTOM_RIGHT && playedPiece == 'O' && ((GridPane.getRowIndex(button) == row + 1 && GridPane.getColumnIndex(button) == col + 1) ||
 				GridPane.getRowIndex(button) == row - 1 && GridPane.getColumnIndex(button) == col - 1)) {
 				button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-background-color: " + currentPlayer + ";" 
 				        + "-fx-opacity: 1;" + "-fx-text-fill: white;");
-			}
+			} 
 		} 
 		
 	}
 	
 	//Method for setting the buttons to the default color
 	public void decolorSquares() {
-		for(Node button : gameBoard.getChildren()) {
+		for(Node button : gameBoardGUI.getChildren()) {
 			button.setStyle("-fx-font-size: 20px;" + "-fx-border-color: black;" + "-fx-opacity: 1;" + "-fx-text-fill: black;");
 		}
+	}
+	
+	//Closes the file for recording moves. This gets called after the application has closed.
+	public void closeRecorder() throws IOException {
+		recording.closeFile();
 	}
 	
 

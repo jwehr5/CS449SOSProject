@@ -14,7 +14,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="793.0" prefWidth="996.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.Controller">
    <children>
-      <GridPane fx:id="gameBoard" alignment="CENTER" gridLinesVisible="true" layoutX="189.0" layoutY="101.0" prefHeight="600.0" prefWidth="600.0">
+      <GridPane fx:id="gameBoardGUI" alignment="CENTER" gridLinesVisible="true" layoutX="189.0" layoutY="101.0" prefHeight="600.0" prefWidth="600.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="50.0" />
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="50.0" />

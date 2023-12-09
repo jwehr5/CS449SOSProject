@@ -105,7 +105,6 @@ public class ComputerPlayer extends Player {
 					}
 					
 					if(b.getCellValue(row - 1, col) != '-' && b.getCellValue(row - 1, col) == ' ') {
-						//System.out.println("In else if branch 9");
 						if(b.getCellValue(row - 2, col) != '-' && b.getCellValue(row - 2, col) == 'S') {
 							rowIndexOfMove = row - 1;
 							colIndexOfMove = col;
@@ -115,10 +114,7 @@ public class ComputerPlayer extends Player {
 					}
 					
 					if(b.getCellValue(row - 1, col + 1) != '-' && b.getCellValue(row - 1, col + 1) == ' ') {
-						//System.out.println("In else if branch 10");
 						if(b.getCellValue(row - 2, col + 2) != '-' && b.getCellValue(row - 2, col + 2) == 'S') {
-							//System.out.println("In inner else if branch 10");
-							//System.out.println((row - 2) + "," + (col - 2));
 							rowIndexOfMove = row - 1;
 							colIndexOfMove = col + 1;
 							letter = "O";
@@ -127,7 +123,6 @@ public class ComputerPlayer extends Player {
 					}
 					
 					if(b.getCellValue(row, col + 1) != '-' && b.getCellValue(row, col + 1) == ' ') {
-						//System.out.println("In else if branch 11");
 						if(b.getCellValue(row, col + 2) != '-' && b.getCellValue(row, col + 2) == 'S') {
 							rowIndexOfMove = row;
 							colIndexOfMove = col + 1;
@@ -137,7 +132,6 @@ public class ComputerPlayer extends Player {
 					}
 					
 					if(b.getCellValue(row + 1, col + 1) != '-' && b.getCellValue(row + 1, col + 1) == ' ') {
-						//System.out.println("In else if branch 12");
 						if(b.getCellValue(row + 2, col + 2) != '-' && b.getCellValue(row + 2, col + 2) == 'S') {
 							rowIndexOfMove = row + 1;
 							colIndexOfMove = col + 1;
@@ -147,7 +141,6 @@ public class ComputerPlayer extends Player {
 					}
 					
 					if(b.getCellValue(row + 1, col) != '-' && b.getCellValue(row + 1, col) == ' ') {
-						//System.out.println("In else if branch 13");
 						if(b.getCellValue(row + 2, col) != '-' && b.getCellValue(row + 2, col) == 'S') {
 							rowIndexOfMove = row + 1;
 							colIndexOfMove = col;
@@ -157,7 +150,6 @@ public class ComputerPlayer extends Player {
 					}
 					
 					if(b.getCellValue(row + 1, col - 1) != '-' && b.getCellValue(row + 1, col - 1) == ' ') {
-						//System.out.println("In else if branch 14");
 						if(b.getCellValue(row + 2, col - 2) != '-' && b.getCellValue(row + 2, col - 2) == 'S') {
 							rowIndexOfMove = row + 1;
 							colIndexOfMove = col - 1;
@@ -167,7 +159,6 @@ public class ComputerPlayer extends Player {
 					} 
 					
 					if(b.getCellValue(row, col - 1) != '-' && b.getCellValue(row, col - 1) == ' ') {
-						//System.out.println("In else if branch 15");
 						if(b.getCellValue(row, col - 2) != '-' && b.getCellValue(row, col - 2) == 'S') {
 							rowIndexOfMove = row;
 							colIndexOfMove = col - 1;
@@ -177,7 +168,6 @@ public class ComputerPlayer extends Player {
 					}
 					
 					if(b.getCellValue(row - 1, col - 1) != '-' && b.getCellValue(row - 1, col - 1) == ' ') {
-						//System.out.println("In else if branch 16");
 						if(b.getCellValue(row - 2, col - 2) != '-' && b.getCellValue(row - 2, col - 2) == 'S') {
 							rowIndexOfMove = row - 1;
 							colIndexOfMove = col - 1;
@@ -254,8 +244,6 @@ public class ComputerPlayer extends Player {
 		
 		
 		//If the computer wasn't able to find a move, then just make a random move
-		System.out.println(rowIndexOfMove);
-		System.out.println(colIndexOfMove);
 		if(rowIndexOfMove == -1 && colIndexOfMove == -1) { 
 			return randomlyMakeAMove(b, gameBoard);
 		}else {
@@ -263,7 +251,6 @@ public class ComputerPlayer extends Player {
 			recentRowIndexMove = rowIndexOfMove;
 			recentColIndexMove = colIndexOfMove;
 
-			System.out.println("About to make a strategic move");
 			b.makeMove(rowIndexOfMove, colIndexOfMove, letter.charAt(0));
 			for(Node button : gameBoard.getChildren()) {
 				if(GridPane.getRowIndex(button) == rowIndexOfMove && GridPane.getColumnIndex(button) == colIndexOfMove) {
@@ -301,16 +288,11 @@ public class ComputerPlayer extends Player {
 		recentlyPlacedPiece = letter.charAt(0);
 		recentRowIndexMove = randRowIndex;
 		recentColIndexMove = randColumnIndex;
-		System.out.println("About to make a random move");
 		b.makeMove(randRowIndex, randColumnIndex, letter.charAt(0)); 
-		System.out.println("randRowIndex: " + randRowIndex);
-		System.out.println("randColIndex: " + randColumnIndex);
+
 		for(Node button : gameBoard.getChildren()) {
 			if(GridPane.getRowIndex(button) == randRowIndex && GridPane.getColumnIndex(button) == randColumnIndex) {
-				System.out.println("Placing Piece on board");
 				placePieceOnGUIBoard((Button) button, letter); 
-				
-				
 				
 				return (Button) button; 
 			}

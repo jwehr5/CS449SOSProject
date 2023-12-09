@@ -2,8 +2,6 @@ package application;
 
 public class SimpleGameBoard extends Board {
 	
-	
-	
 	 public SimpleGameBoard(int size){
 		super(size);
 	}
@@ -55,5 +53,4 @@ public class SimpleGameBoard extends Board {
 	}
 	
 	
-
 }
